@@ -85,6 +85,7 @@ pthread_cond_t cDone = PTHREAD_COND_INITIALIZER;
 
 char *fnConfig = "digest2.config";
 char *fnModel = "digest2.model";
+char *fnCSV = "../d2model/model.csv";
 char *fnOcd = "digest2.obscodes";
 char *fpConfig = "";
 
@@ -99,10 +100,15 @@ _Bool headings, rms, repeatable;
 int outputLineSize;
 char *outputLine;
 
+// some stuff just used for CSV.  could be dynamically allocated...
+char line[400];
+char field[40];
+
 char msgConfig[] = "Unrecognized line in config file:  %s\n";
 char msgMemory[] = "Memory allocation failed.\n";
 char msgOpen[] = "Open %s failed.\n";
 char msgRead[] = "Read %s failed.\n";
+char msgCSV[] = "Model %s missing or invalid.\n";
 char msgStatus[] = "Internal error:  Unexpected tracklet status.\n";
 char msgThread[] = "Thread creation failed.\n";
 char msgOption[] = "Unknown option: %s\n";
@@ -176,6 +182,82 @@ int mustStrtoi(char *str)
     return result;
 }
 
+// TODO consistency, standard exit
+void csvError(char *mod, char *class, int iq, int ie, int ii, char *heading) {
+    printf("CSV error %s %s\n", mod, class);
+    printf("Q e i = %g %g %g\n", qpart[iq], epart[ie], ipart[ii]);
+    printf("%s field: \"%s\"\n", heading, field);
+    exit(-1);
+}
+
+// scans to ',' or end of string, copying to field as long as it fits.
+// returns pointer to character of start that terminated the scan, ',' or
+// the terminating null.  in the case where data would overflow field,
+// nothing is copied and start is returned.
+char *scanField(char *start) {
+    char *end = strchr(start, ',');
+    if (!end) {
+        end = strchr(start, 0);
+    }
+    int n = end-start;
+    if (n > sizeof(field)-1) {
+        *field = 0;
+        return start;
+    }
+    memcpy(field, start, n);
+    field[n] = 0;
+    return end;
+}
+
+void readCSVClass(FILE *fcsv, double pop[QX][EX][IX][HX], char *mod, char *class) {
+	char *t;
+    double d;
+    for (int iq = 0; iq < QX; iq++)
+        for (int ie = 0; ie < EX; ie++)
+            for (int ii = 0; ii < IX; ii++) {
+                fgets(line, sizeof(line), fcsv);
+                char *p = scanField(line);
+                if (*p != ',' || strcmp(field, mod) != 0) {
+                    csvError(mod, class, iq, ie, ii, "Model");
+                }
+                p = scanField(p+1);
+                if (*p != ',' || strcmp(field, class) != 0) {
+                    csvError(mod, class, iq, ie, ii, "Class");
+                }
+                p = scanField(p+1);
+                if (*p != ',' || fabs(strtod(field, &t) - qpart[iq]) > 1e-9) {
+                    csvError(mod, class, iq, ie, ii, "Q");
+                }
+                p = scanField(p+1);
+                if (*p != ',' || fabs(strtod(field, &t) - epart[ie]) > 1e-9) {
+                    csvError(mod, class, iq, ie, ii, "e");
+                }
+                p = scanField(p+1);
+                if (*p != ',' || fabs(strtod(field, &t) - ipart[ii]) > 1e-9) {
+                    csvError(mod, class, iq, ie, ii, "i");
+                }
+                for (int ih = 0; ih < HX; ih++) {
+                    p = scanField(p+1);
+                    pop[iq][ie][ii][ih] = strtod(field, &t);
+                    if (*p == (ih < HX-1 ? ',' : 0)) { // need delimiter
+						if (t > field) continue; // and either something parsed
+						if (!*t || *t == '\n') continue; // or empty field
+                    }
+                    sprintf(line, "H%g", hpart[ih]);
+                    csvError(mod, class, iq, ie, ii, line);
+                }
+            }
+}
+
+void mheader() {
+    strcpy(line, "Model,Class,Q,e,i");
+    int j = strlen(line);
+    for (int i = 0; i < HX; i++) {
+        j += sprintf(line+j, ",H%g", hpart[i]);
+    }
+    strcpy(line+j, "\n");
+}
+
 /* readModel()
 
 read population model into memory
@@ -184,6 +266,31 @@ Notes:
    on error, prints message to stdout and terminates.
 */
 void readModel()
+{
+	// temp code: read csv from hardcoded path
+	FILE *fcsv = fopen(fnCSV, "r");
+	if (!fcsv)
+		fatal1(msgOpen, fnCSV);
+
+	mheader();
+    char test_line[400];
+	strcpy(test_line, line);
+	fgets(line, sizeof(line), fcsv);
+	if (strcmp(line, test_line)) {
+		puts(test_line);
+		puts(line);
+		fatal("CSV header\n");
+	}
+	readCSVClass(fcsv, modelAllSS, "All", "SS");
+	readCSVClass(fcsv, modelUnkSS, "Unk", "SS");
+    for (int c = 0; c < D2CLASSES; c++) {
+		readCSVClass(fcsv, modelAllClass[c], "All", classAbbr[c]);
+		readCSVClass(fcsv, modelUnkClass[c], "Unk", classAbbr[c]);
+	}
+	fclose(fcsv);
+}
+
+void readModelArrays()
 {
     FILE *fmuk = openCP(fnModel, modelSpec);
     if (!fmuk)
