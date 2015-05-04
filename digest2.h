@@ -153,7 +153,7 @@ double mustStrtod(char *str);
 int mustStrtoi(char *str);
 
 extern _Bool ocdSpec;
-FILE *openCP(char *fn, _Bool spec);
+FILE *openCP(char *fn, _Bool spec, char *mode);
 
 // functions in mpc.c
 int parseCod3(char *);

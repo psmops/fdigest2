@@ -58,7 +58,7 @@ void readMpcOcd(void)
     // Scale factor = earth radius in m / 1 AU in m.
     const double sf = 6.37814e6 / 149.59787e9;
 
-    FILE *focd = openCP(fnOcd, ocdSpec);
+    FILE *focd = openCP(fnOcd, ocdSpec, "r");
     if (!focd)
         fatal1(msgOpen, fnOcd);
 

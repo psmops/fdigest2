@@ -8,6 +8,9 @@ compute probabilities that observed objects are of various orbit classes.
 
 See external file README for additional information.
 */
+
+#define _POSIX_SOURCE
+
 #include <ctype.h>
 #include <errno.h>
 #include <getopt.h>
@@ -17,6 +20,7 @@ See external file README for additional information.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "digest2.h"
@@ -85,7 +89,7 @@ pthread_cond_t cDone = PTHREAD_COND_INITIALIZER;
 
 char *fnConfig = "digest2.config";
 char *fnModel = "digest2.model";
-char *fnCSV = "../d2model/model.csv";
+char *fnCSV = "model.csv";
 char *fnOcd = "digest2.obscodes";
 char *fpConfig = "";
 
@@ -108,6 +112,7 @@ char msgConfig[] = "Unrecognized line in config file:  %s\n";
 char msgMemory[] = "Memory allocation failed.\n";
 char msgOpen[] = "Open %s failed.\n";
 char msgRead[] = "Read %s failed.\n";
+char msgWrite[] = "Write %s failed.\n";
 char msgCSV[] = "Model %s missing or invalid.\n";
 char msgStatus[] = "Internal error:  Unexpected tracklet status.\n";
 char msgThread[] = "Thread creation failed.\n";
@@ -116,12 +121,13 @@ char msgObsErr[] = "%s\nConfig file line: %s\n";
 char msgUsage[] = "\
 Usage: digest2 [options] <obsfile>    score observations in file\n\
        digest2 [options] -            score observations from stdin\n\
+       digest2 -m <model file spec>   generate binary model from CSV\n\n\
        digest2 -h or --help           display help and quick reference\n\
        digest2 -v or --version        display version and copyright\n\
 \n\
 Options:\n\
        -c or --config <config-file>\n\
-       -m or --model <model-file>\n\
+       -m or --model <binary model-file>\n\
        -o or --obscodes <obscode-file>\n\
        -p or --config-path <path>\n\
        -u or --cpu <n-cores>\n";
@@ -267,8 +273,11 @@ Notes:
 */
 void readModel()
 {
-	// temp code: read csv from hardcoded path
-	FILE *fcsv = fopen(fnCSV, "r");
+}
+
+void readCSV(struct stat *buf) {
+	// TODO temp code: read csv from hardcoded path
+	FILE *fcsv = openCP(fnCSV, 0, "r"); // 0 because no switch for this.
 	if (!fcsv)
 		fatal1(msgOpen, fnCSV);
 
@@ -277,6 +286,7 @@ void readModel()
 	strcpy(test_line, line);
 	fgets(line, sizeof(line), fcsv);
 	if (strcmp(line, test_line)) {
+		// TODO.  reconsider error message.  maybe just a warning?
 		puts(test_line);
 		puts(line);
 		fatal("CSV header\n");
@@ -287,12 +297,26 @@ void readModel()
 		readCSVClass(fcsv, modelAllClass[c], "All", classAbbr[c]);
 		readCSVClass(fcsv, modelUnkClass[c], "Unk", classAbbr[c]);
 	}
+	fstat(fileno(fcsv), buf);
 	fclose(fcsv);
+}
+
+void writeModel(struct stat *csv) {
+	FILE *fmod = openCP(fnModel, modelSpec, "w");
+	if (!fwrite(&csv->st_size, sizeof(csv->st_size), 1, fmod) ||
+		!fwrite(&csv->st_mtime, sizeof(csv->st_mtime), 1, fmod) ||
+    	!fwrite(modelAllSS, sizeof modelAllSS, 1, fmod) ||
+        !fwrite(modelUnkSS, sizeof modelUnkSS, 1, fmod) ||
+        !fwrite(modelAllClass, sizeof modelAllClass, 1, fmod) ||
+        !fwrite(modelUnkClass, sizeof modelUnkClass, 1, fmod)) {
+        fatal1(msgWrite, fnModel);
+        fclose(fmod);
+	}
 }
 
 void readModelArrays()
 {
-    FILE *fmuk = openCP(fnModel, modelSpec);
+    FILE *fmuk = openCP(fnModel, modelSpec, "r");
     if (!fmuk)
         fatal1(msgOpen, fnModel);
 
@@ -562,14 +586,14 @@ void *scoreStaged(void *id)
     return NULL;
 }
 
-FILE *openCP(char *fn, _Bool spec)
+FILE *openCP(char *fn, _Bool spec, char *mode)
 {
     if (!spec && pathSpec) {
         char *p = malloc(strlen(fpConfig) + strlen(fn) + 2);
         sprintf(p, "%s/%s", fpConfig, fn);
         fn = p;
     }
-    return fopen(fn, "r");
+    return fopen(fn, mode);
 }
 
 char *parseObsErr(char *s)
@@ -600,7 +624,7 @@ char *parseObsErr(char *s)
 
 void readConfig()
 {
-    FILE *fcfg = openCP(fnConfig, configSpec);
+    FILE *fcfg = openCP(fnConfig, configSpec, "r");
 
     if (!fcfg) {
         if (!configSpec)
@@ -708,6 +732,8 @@ void readConfig()
             classCompute[nClassCompute] = classColumn[nClassCompute];
 }
 
+// returns obs file specified on command line.  this can be null, "-",
+// or a filespec.
 char *parseCl(int argc, char **argv)
 {
     while (1) {
@@ -769,19 +795,25 @@ Orbit classes:");
             cpuSpec = 1;
             break;
         case -1:
-            // exactly one arg should be left, the input observation file
-            if (optind != argc - 1)
-                fatal(msgUsage);        // no arg left
-            char *fnObs = argv[optind];
-            // the single character '-' is allowed for the arg and means
-            // read from stdin.
-            if (fnObs[0] == '-' && fnObs[1] != 0)
-                fatal(msgUsage);        // "--" or -anything else is invalid
-            return argv[optind];
+            // typcally one arg should be left, the input observation file.
+			// it can be "-", meaning read from stdin.
+			// if no args remain, -m is required.
+			if (optind == argc && modelSpec) {
+                return 0;
+			}
+			char *fnObs = argv[optind];
+            if (optind == argc - 1 && (fnObs[0] != '-' || fnObs[1] == 0)) {
+				return fnObs;
+            }
+			// else fall through
         default:
             fatal(msgUsage);
         }
     }
+}
+
+void statCSV() {
+	fatal("unimplemented");
 }
 
 /* main
@@ -799,9 +831,24 @@ limitations of this driver:
 
    - results are text on stdout.
 */
-int main(int argc, char **argv)
-{
-    char *fnObs = parseCl(argc, argv);  // sets up globals and terminates on error
+int main(int argc, char **argv) {
+	// sets up globals and terminates on error
+    char *fnObs = parseCl(argc, argv);
+
+	if (!fnObs) {
+		// generate model (parseCL validates -m was specified.)
+		struct stat csv;
+		readCSV(&csv);
+		writeModel(&csv);
+		return 0;
+	}
+
+	if (modelSpec) {
+    	readModel(); // fast path using binary model file only. no csv checks.
+	} else {
+		statCSV(); // csv/model cacheing logic
+	}
+	// continue to computations
 
     FILE *fobs = strcmp(fnObs, "-")
         ? fopen(fnObs, "r")     // test that file can be opened
@@ -818,7 +865,6 @@ int main(int argc, char **argv)
     // three more that set up globals and terminate on error
     initGlobals();
     readMpcOcd();
-    readModel();
 
     // default configuration
     classPossible = 1;
