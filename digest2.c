@@ -9,6 +9,7 @@ compute probabilities that observed objects are of various orbit classes.
 See external file README for additional information.
 */
 
+// posix source added for fileno()
 #define _POSIX_SOURCE
 
 #include <ctype.h>
@@ -113,7 +114,7 @@ char msgMemory[] = "Memory allocation failed.\n";
 char msgOpen[] = "Open %s failed.\n";
 char msgRead[] = "Read %s failed.\n";
 char msgWrite[] = "Write %s failed.\n";
-char msgCSV[] = "Model %s missing or invalid.\n";
+char msgReadInvalid[] = "Read %s failed, contents invalid.\n";
 char msgStatus[] = "Internal error:  Unexpected tracklet status.\n";
 char msgThread[] = "Thread creation failed.\n";
 char msgOption[] = "Unknown option: %s\n";
@@ -264,16 +265,6 @@ void mheader() {
     strcpy(line+j, "\n");
 }
 
-/* readModel()
-
-read population model into memory
-
-Notes:
-   on error, prints message to stdout and terminates.
-*/
-void readModel()
-{
-}
 
 void readCSV(struct stat *buf) {
 	// TODO temp code: read csv from hardcoded path
@@ -312,21 +303,6 @@ void writeModel(struct stat *csv) {
         fatal1(msgWrite, fnModel);
         fclose(fmod);
 	}
-}
-
-void readModelArrays()
-{
-    FILE *fmuk = openCP(fnModel, modelSpec, "r");
-    if (!fmuk)
-        fatal1(msgOpen, fnModel);
-
-    if (!fread(modelAllSS, sizeof modelAllSS, 1, fmuk) ||
-        !fread(modelUnkSS, sizeof modelUnkSS, 1, fmuk) ||
-        !fread(modelAllClass, sizeof modelAllClass, 1, fmuk) ||
-        !fread(modelUnkClass, sizeof modelUnkClass, 1, fmuk))
-        fatal1(msgRead, fnModel);
-
-    fclose(fmuk);
 }
 
 /* resetInvalid
@@ -586,14 +562,17 @@ void *scoreStaged(void *id)
     return NULL;
 }
 
-FILE *openCP(char *fn, _Bool spec, char *mode)
-{
-    if (!spec && pathSpec) {
-        char *p = malloc(strlen(fpConfig) + strlen(fn) + 2);
-        sprintf(p, "%s/%s", fpConfig, fn);
-        fn = p;
-    }
-    return fopen(fn, mode);
+char *CPspec(char *fn, _Bool spec) {
+    if (spec || !pathSpec) {
+		return fn;
+	}
+    char *p = malloc(strlen(fpConfig) + strlen(fn) + 2);
+    sprintf(p, "%s/%s", fpConfig, fn);
+    return p;
+}
+
+FILE *openCP(char *fn, _Bool spec, char *mode) {
+    return fopen(CPspec(fn, spec), mode);
 }
 
 char *parseObsErr(char *s)
@@ -812,8 +791,77 @@ Orbit classes:");
     }
 }
 
-void statCSV() {
-	fatal("unimplemented");
+void convertCSV(FILE* fmod) {
+	fatal("not implemented");
+}
+
+// read population model.
+// prefer binary, with check that it matches the CSV.
+void readModelStatCSV()
+{
+	// start with binary, if it's not not there, options are limited.
+    FILE *fmod = openCP(fnModel, modelSpec, "r");
+    if (!fmod) {       // no binary,
+        convertCSV(0); // try csv, with no binary fallback
+		return; // success reading csv
+	}
+
+	// binary opened okay, read header
+	struct stat mod;
+    if (!fread(&mod.st_size, sizeof mod.st_size, 1, fmod) ||
+        !fread(&mod.st_mtime, sizeof mod.st_mtime, 1, fmod)) {
+		fclose(fmod);                    // binary seems corrupt
+		printf(msgReadInvalid, fnModel); // give warning message
+		convertCSV(0); // try replacing it, but with no binary fallback
+		return; // success reading csv
+	}
+
+	// binary readable so far, stat csv and compare
+	struct stat csv;
+	int csv_stat_err = stat(CPspec(fnCSV, 0), &csv);
+	if (!csv_stat_err ||                // csv stat okay,
+		csv.st_size != mod.st_size ||   // but size or time don't match
+		csv.st_mtime != mod.st_mtime)
+	{
+		convertCSV(fmod); // try replacing it, with fmod as fallback.
+		return; // success reading csv
+	}
+
+	// at least no csv inconsistency, continue with binary
+    _Bool bin_ok = fread(modelAllSS, sizeof modelAllSS, 1, fmod) &&
+        fread(modelUnkSS, sizeof modelUnkSS, 1, fmod) &&
+        fread(modelAllClass, sizeof modelAllClass, 1, fmod) &&
+        fread(modelUnkClass, sizeof modelUnkClass, 1, fmod);
+	fclose(fmod);
+	if (bin_ok) {
+		return; // success reading binary
+	}
+
+	// last chance
+	if (!csv_stat_err) {
+		convertCSV(0);
+		return;        // whew, success reading csv
+	}
+
+    printf(msgReadInvalid, fnModel); // message about binary
+	fatal1(msgRead, fnCSV);          // and ultimate failure
+}
+
+void readModel() {
+    FILE *fmod = openCP(fnModel, modelSpec, "r");
+    if (!fmod) {
+		fatal1(msgRead, fnModel);
+	}
+	struct stat mod;
+    if (!fread(&mod.st_size, sizeof mod.st_size, 1, fmod) ||
+        !fread(&mod.st_mtime, sizeof mod.st_mtime, 1, fmod) ||
+        !fread(modelAllSS, sizeof modelAllSS, 1, fmod) ||
+        !fread(modelUnkSS, sizeof modelUnkSS, 1, fmod) ||
+        !fread(modelAllClass, sizeof modelAllClass, 1, fmod) ||
+        !fread(modelUnkClass, sizeof modelUnkClass, 1, fmod)) {
+		fatal1(msgRead, fnModel); 
+	}
+	fclose(fmod);
 }
 
 /* main
@@ -836,7 +884,8 @@ int main(int argc, char **argv) {
     char *fnObs = parseCl(argc, argv);
 
 	if (!fnObs) {
-		// generate model (parseCL validates -m was specified.)
+		// generate model only, no computations
+		// (parseCL will have already validated that -m was specified.)
 		struct stat csv;
 		readCSV(&csv);
 		writeModel(&csv);
@@ -846,7 +895,7 @@ int main(int argc, char **argv) {
 	if (modelSpec) {
     	readModel(); // fast path using binary model file only. no csv checks.
 	} else {
-		statCSV(); // csv/model cacheing logic
+		readModelStatCSV(); // with model/csv caching logic
 	}
 	// continue to computations
 
