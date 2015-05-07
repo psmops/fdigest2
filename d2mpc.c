@@ -4,6 +4,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -35,6 +36,37 @@ int parseCod3(char *cod3)
         return hp * 100 + (cod3[1] - '0') * 10 + cod3[2] - '0';
 
     return -1;
+}
+
+/* mustStrtod
+
+for required fields.  a version of atof that sets errno on blank input.
+also allows whitespace after sign
+*/
+double mustStrtod(char *str)
+{
+    char *endp;
+    _Bool neg = *str == '-';
+    if (neg || *str == '+')
+        str++;
+    double result = strtod(str, &endp);
+    if (!errno && endp == str)
+        errno = EINVAL;
+    return neg ? -result : result;
+}
+
+/* mustStrtoi
+
+returns int but actually disallows negatives.
+*/
+int mustStrtoi(char *str)
+{
+    char *endp;
+    long result = strtol(str, &endp, 10);
+    if (!errno)
+        if (endp == str || result < 0 || result > INT_MAX)
+            errno = EINVAL;
+    return result;
 }
 
 /* readMpcOcd()

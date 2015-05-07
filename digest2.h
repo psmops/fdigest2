@@ -4,6 +4,8 @@
 
 #include <regex.h>
 #include <stdint.h>
+#include <sys/stat.h>
+
 #include "d2model.h"
 
 // M_PI is in math.h, but not defined in some strict modes
@@ -133,7 +135,9 @@ extern char msgMemory[];
 extern char msgOpen[];
 extern char msgRead[];
 extern char msgStatus[];
+extern char msgThread[];
 extern char msgUsage[];
+extern char msgVersion[];
 
 #define obscodeNamespaceSize 3600
 extern site siteTable[obscodeNamespaceSize];
@@ -145,15 +149,31 @@ extern int nClassCompute;
 extern int classCompute[D2CLASSES];
 extern double obsErr;
 extern regex_t rxObsErr;
+extern int cores;
 
 void fatal(char *msg);
 void fatal1(char *msg, char *arg);
 
-double mustStrtod(char *str);
-int mustStrtoi(char *str);
-
+extern _Bool cpuSpec;
+extern _Bool modelSpec;
 extern _Bool ocdSpec;
+extern _Bool classPossible;
+extern _Bool raw, noid;
+extern _Bool headings, rms, repeatable;
+extern int nClassCompute;
+extern int nClassColumns;
+extern int classCompute[D2CLASSES];
+extern int classColumn[D2CLASSES];
+
+
+// functions in d2cli.c
 FILE *openCP(char *fn, _Bool spec, char *mode);
+char *parseCl(int argc, char **argv);
+void readCSV(struct stat *);
+void readConfig();
+void readModel();
+void readModelStatCSV();
+void writeModel(struct stat *);
 
 // functions in mpc.c
 int parseCod3(char *);
