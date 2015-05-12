@@ -339,15 +339,16 @@ int main(int argc, char **argv) {
 		// generate model only, no computations
 		// (parseCL will have already validated that -m was specified.)
 		struct stat csv;
-		readCSV(&csv);
+		mustReadCSV(&csv);
 		writeModel(&csv);
 		return 0;
 	}
 
 	if (modelSpec) {
-    	readModel(); // fast path using binary model file only. no csv checks.
+ 		// fast path using binary model file only. no csv checks.
+    	mustReadModel();
 	} else {
-		readModelStatCSV(); // with model/csv caching logic
+		mustReadModelStatCSV(); // with model/csv caching logic
 	}
 	// continue to computations
 

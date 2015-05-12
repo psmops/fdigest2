@@ -169,10 +169,10 @@ extern int classColumn[D2CLASSES];
 // functions in d2cli.c
 FILE *openCP(char *fn, _Bool spec, char *mode);
 char *parseCl(int argc, char **argv);
-void readCSV(struct stat *);
+void mustReadCSV(struct stat *);
 void readConfig();
-void readModel();
-void readModelStatCSV();
+void mustReadModel();
+void mustReadModelStatCSV();
 void writeModel(struct stat *);
 
 // functions in mpc.c
