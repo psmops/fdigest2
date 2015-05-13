@@ -6,9 +6,12 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "digest2.h"
+
+#define OCD_URL "http://www.minorplanetcenter.net/iau/lists/ObsCodes.html"
 
 // functions
 //-----------------------------------------------------------------------------
@@ -69,35 +72,37 @@ int mustStrtoi(char *str)
 	return result;
 }
 
-/* readMpcOcd()
+/* readOCD()
 
 read obscode.dat into memory.
 
 Notes:
-   On error, prints message to stdout and terminates program.
+   On file error, leaves error message in line and returns false.
 
    Units of rho sin/cos phi in obscode.dat are equatorial radii
    of the Earth.  Converted to AU here for easier use later.
    Units of longitude are degrees, 
    Converted here to circles for easier use later.
 */
-void readMpcOcd(void)
+_Bool readOCD(void)
 {
+	FILE *focd = openCP(fnOCD, ocdSpec, "r");
+	if (!focd) {
+		sprintf(line, msgOpen, fnOCD);
+		return false;
+	}
+
+	if (!fgets(line, sizeof(line), focd)) {
+		sprintf(line, msgRead, fnOCD);
+		return false;
+	}
+
 	site *psite = siteTable;
 	for (int i = 0; i < obscodeNamespaceSize; i++, psite++) {
 		psite->obsErr = -1;	// means unspecified
 	}
 	// Scale factor = earth radius in m / 1 AU in m.
 	const double sf = 6.37814e6 / 149.59787e9;
-
-	FILE *focd = openCP(fnOcd, ocdSpec, "r");
-	if (!focd)
-		fatal1(msgOpen, fnOcd);
-
-	const int LINE_SIZE = 82;
-	char line[LINE_SIZE];
-	if (!fgets(line, LINE_SIZE, focd))
-		fatal1(msgRead, fnOcd);
 
 	do {
 		int idx = parseCod3(line);
@@ -123,6 +128,35 @@ void readMpcOcd(void)
 	while (fgets(line, LINE_SIZE, focd));
 
 	fclose(focd);
+	return true;
+}
+
+void mustReadOCD(void)
+{
+	if (!readOCD()) {
+		fatal(line);
+	}
+}
+
+_Bool getOCD()
+{
+	sprintf(line, "curl %s -o %s", OCD_URL, CPspec(fnOCD, ocdSpec));
+	if (system(line) != 0) {
+		printf("msgAccess", OCD_URL);
+		return false;
+	}
+	return true;
+}
+
+void mustReadGetOCD()
+{
+	if (readOCD()) {
+		return;
+	}
+	if (!getOCD()) {
+		exit(-1);
+	}
+	mustReadOCD();
 }
 
 /* parseMpc80

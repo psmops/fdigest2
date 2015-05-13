@@ -127,10 +127,15 @@ typedef struct {
 	double dr;
 } gcfparam;
 
+#define LINE_SIZE 400
+#define FIELD_SIZE 40
+extern char line[LINE_SIZE];
+extern char field[FIELD_SIZE];
+
 extern char *fnConfig;
 extern char *fnCSV;
 extern char *fnModel;
-extern char *fnOcd;
+extern char *fnOCD;
 
 extern char msgCSVData[];
 extern char msgCSVHeader[];
@@ -183,8 +188,10 @@ void mustReadModelStatCSV();
 void writeModel(struct stat *);
 
 // functions in mpc.c
+_Bool getOCD();
+void mustReadOCD();
+void mustReadGetOCD();
 int parseCod3(char *);
-void readMpcOcd(void);
 _Bool parseMpc80(char *line, observation * obsp);
 _Bool parseMpcSat(char *line, observation * obsp);
 

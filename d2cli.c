@@ -2,13 +2,8 @@
 //
 // Public domain.
 
-// posix source added for fileno()
-#define _POSIX_SOURCE
-
 #include <errno.h>
 #include <getopt.h>
-#include <math.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,11 +12,13 @@
 #include "digest2.h"
 
 char msgVersion[] =
-    "Digest2 version 0.16 -- Released February 20 2015 -- Compiled %s\n";
+    "Digest2 version 0.17 -- Released February 20 2015 -- Compiled %s\n";
 char msgCopyright[] = "Public domain.";
 
 // stuff used for parsing command line
 //-----------------------------------------------------------------------------
+char line[LINE_SIZE];
+char field[FIELD_SIZE];
 char sOpt[] = "hvc:m:o:p:u:";
 struct option lOpt[] = {
 	{"help", no_argument, 0, 'h'},
@@ -55,7 +52,7 @@ int classColumn[D2CLASSES];
 char *fnConfig = "digest2.config";
 char *fnModel = "digest2.model";
 char *fnCSV = "model.csv";
-char *fnOcd = "digest2.obscodes";
+char *fnOCD = "digest2.obscodes";
 char *fpConfig = "";
 
 char msgCSVHeader[] = "Invalid CSV header:  %s\n";
@@ -342,7 +339,7 @@ Orbit classes:");
 			modelSpec = 1;
 			break;
 		case 'o':
-			fnOcd = optarg;
+			fnOCD = optarg;
 			ocdSpec = 1;
 			break;
 		case 'p':
@@ -359,8 +356,8 @@ Orbit classes:");
 		case -1:
 			// typcally one arg should be left, the input observation file.
 			// it can be "-", meaning read from stdin.
-			// if no args remain, -m is required.
-			if (optind == argc && modelSpec) {
+			// if no args remain, -m or -o is required.
+			if (optind == argc && (modelSpec || ocdSpec)) {
 				return 0;
 			}
 			char *fnObs = argv[optind];

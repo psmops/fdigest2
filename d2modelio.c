@@ -5,8 +5,6 @@
 // posix source added for fileno()
 #define _POSIX_SOURCE
 
-#include <errno.h>
-#include <getopt.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -15,10 +13,6 @@
 #include <time.h>
 
 #include "digest2.h"
-
-// some stuff just used for CSV.
-char line[400];
-char field[40];
 
 _Bool csvError(char *mod, char *class, int iq, int ie, int ii, char *heading)
 {
@@ -119,7 +113,6 @@ void mheader()
 // on failure, global `line` will have a suitable error message.
 _Bool readCSV(struct stat *buf)
 {
-	// TODO temp code: read csv from hardcoded path
 	FILE *fcsv = openCP(fnCSV, 0, "r");	// 0 because no switch for this.
 	if (!fcsv) {
 		sprintf(line, msgOpen, fnCSV);
@@ -198,7 +191,6 @@ void convertCSV(FILE * fmod)
 		return;
 	}
 	if (!readCSV(&csv)) {
-		printf(msgRead, fnCSV);
 		if (!readArrays(fmod)) {	// if CSV fails, fallback must work
 			fatal1(msgRead, fnCSV);
 		}

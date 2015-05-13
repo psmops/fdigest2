@@ -355,20 +355,35 @@ int main(int argc, char **argv)
 	// sets up globals and terminates on error
 	char *fnObs = parseCl(argc, argv);
 
-	if (!fnObs) {
-		// generate model only, no computations
-		// (parseCL will have already validated that -m was specified.)
-		struct stat csv;
-		mustReadCSV(&csv);
-		writeModel(&csv);
-		return 0;
-	}
-
+	// read model
 	if (modelSpec) {
-		// fast path using binary model file only. no csv checks.
-		mustReadModel();
+		if (fnObs) {
+			// fast path using binary model file only. no csv checks.
+			mustReadModel();
+		} else {
+			// generate model only, no computations
+			struct stat csv;
+			mustReadCSV(&csv);
+			writeModel(&csv);
+		}
 	} else {
 		mustReadModelStatCSV();	// with model/csv caching logic
+	}
+
+	// similar logic for obscode dat
+	if (ocdSpec) {
+		if (fnObs) {
+			mustReadOCD();
+		} else {
+			// get obscode dat only, no computations
+			getOCD();
+		}
+	} else {
+		mustReadGetOCD();	// with caching logic
+	}
+
+	if (!fnObs) {
+		exit(0);	// just generating model or getting obscode dat.
 	}
 	// continue to computations
 
@@ -378,15 +393,11 @@ int main(int argc, char **argv)
 	if (!fobs)
 		fatal1(msgOpen, fnObs);
 
-	// 83 = 80 column record + optional cr + nl + terminating 0
-	const int LINE_SIZE = 83;
-	char line[LINE_SIZE];
 	if (!fgets(line, LINE_SIZE, fobs))	// test that file can be read
 		fatal1(msgRead, argv[1]);
 
 	// three more that set up globals and terminate on error
 	initGlobals();
-	readMpcOcd();
 
 	// default configuration
 	classPossible = 1;
