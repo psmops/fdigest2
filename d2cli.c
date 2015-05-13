@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "digest2.h"
 
@@ -64,8 +65,11 @@ char field[40];
 
 char msgCSVHeader[] = "Invalid CSV header:  %s\n";
 char msgCSVData[] = "Invalid CSV data:  %s\n";
+char msgCSVStat[] = "%s %d bytes %s"; // file name, size, date
 char msgConfig[] = "Unrecognized line in config file:  %s\n";
 char msgMemory[] = "Memory allocation failed.\n";
+char msgMissing[] = "%s not present.\n";
+char msgModelBasis[] = "%s based on csv of\n          %d bytes %s";
 char msgOpen[] = "Open %s failed.\n";
 char msgRead[] = "Read %s failed.\n";
 char msgWrite[] = "Write %s failed.\n";
@@ -341,8 +345,8 @@ void mustReadModelStatCSV()
 	// binary readable so far, stat csv and compare
 	struct stat csv;
 	int csv_stat_err = stat(CPspec(fnCSV, 0), &csv);
-	if (csv_stat_err ||                // csv stat okay,
-		csv.st_size != mod.st_size ||   // but size or time don't match
+	if (csv_stat_err ||                // csv stat failed,
+		csv.st_size != mod.st_size ||   // or size or time don't match
 		csv.st_mtime != mod.st_mtime)
 	{
 		convertCSV(fmod); // try replacing it, with fmod as fallback.
@@ -489,6 +493,35 @@ void readConfig()
             classCompute[nClassCompute] = classColumn[nClassCompute];
 }
 
+void printVersion() {
+    printf(msgVersion, __DATE__);
+	puts(msgCopyright);
+
+	// attempt date/size of csv
+    struct stat csv;
+	int csv_stat_err = stat(CPspec(fnCSV, 0), &csv);
+	if (csv_stat_err) {                // csv stat failed
+		printf(msgMissing, fnCSV);
+	} else {
+		printf(msgCSVStat, fnCSV, csv.st_size, ctime(&csv.st_mtime));
+	}
+
+	// attempt read model header
+    struct stat mod;
+    FILE *fmod = openCP(fnModel, modelSpec, "r");
+    if (!fmod) {       // no binary,
+		printf(msgMissing, fnModel);
+		return;
+	}
+    if (!fread(&mod.st_size, sizeof mod.st_size, 1, fmod) ||
+        !fread(&mod.st_mtime, sizeof mod.st_mtime, 1, fmod)) {
+		fclose(fmod);                    // binary seems corrupt
+		printf(msgRead, fnModel);
+		return;
+	}
+	printf(msgModelBasis, fnModel, mod.st_size, ctime(&mod.st_mtime));
+}
+
 // returns obs file specified on command line.  this can be null, "-",
 // or a filespec.
 char *parseCl(int argc, char **argv)
@@ -525,8 +558,7 @@ Orbit classes:");
             puts("\nSee README for additional information.");
             exit(0);
         case 'v':
-            printf(msgVersion, __DATE__);
-			puts(msgCopyright);
+            printVersion();
             exit(0);
         case 'c':
             fnConfig = optarg;
