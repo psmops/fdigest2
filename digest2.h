@@ -128,12 +128,17 @@ typedef struct {
 } gcfparam;
 
 extern char *fnConfig;
+extern char *fnCSV;
 extern char *fnModel;
 extern char *fnOcd;
 
+extern char msgCSVData[];
+extern char msgCSVHeader[];
 extern char msgMemory[];
 extern char msgOpen[];
 extern char msgRead[];
+extern char msgReadInvalid[];
+extern char msgWrite[];
 extern char msgStatus[];
 extern char msgThread[];
 extern char msgUsage[];
@@ -166,10 +171,13 @@ extern int classCompute[D2CLASSES];
 extern int classColumn[D2CLASSES];
 
 // functions in d2cli.c
+char *CPspec(char *fn, _Bool spec);
 FILE *openCP(char *fn, _Bool spec, char *mode);
 char *parseCl(int argc, char **argv);
-void mustReadCSV(struct stat *);
 void readConfig();
+
+// functions in d2modelio.c
+void mustReadCSV(struct stat *);
 void mustReadModel();
 void mustReadModelStatCSV();
 void writeModel(struct stat *);

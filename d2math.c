@@ -453,11 +453,12 @@ _Bool searchAngles(tracklet * tk)
 						for (int c = 0;
 						     c < nClassCompute;
 						     c++, cl++) {
-							if (cl->
-							    dInClass[iq][ie][ii]
+							if (cl->dInClass[iq][ie]
+							    [ii]
 							    [ih]
-							    && !cl->
-							    tagInClass[iq][ie]
+							    &&
+							    !cl->tagInClass[iq]
+							    [ie]
 							    [ii][ih]) {
 								newTag = 1;
 								cl->tagInClass
@@ -468,11 +469,12 @@ _Bool searchAngles(tracklet * tk)
 								cl->sumUnkInClass += modelUnkClass[classCompute[c]][iq][ie]
 								    [ii][ih];
 							}
-							if (cl->
-							    dOutOfClass[iq][ie]
+							if (cl->dOutOfClass[iq]
+							    [ie]
 							    [ii][ih]
-							    && !cl->
-							    tagOutOfClass[iq]
+							    &&
+							    !cl->tagOutOfClass
+							    [iq]
 							    [ie][ii][ih]) {
 								newTag = 1;
 								cl->tagOutOfClass[iq][ie][ii][ih] = 1;
