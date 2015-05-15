@@ -145,6 +145,8 @@ the total number of cores in the computer.
 If you create `fmo.obs` as described above in section 1, program overview,
 the trial run `./digest2 fmo.obs` should give results similar to those shown above.
 
+Known quirk:  The order of designations may not match the input.
+
 If you had a successful trial run, digest2 will have created two additional files.
 It will have accessed the MPC web site and downloaded observatory code data
 and it will have written a binary form of the model file.  Digest2 downloads
@@ -177,7 +179,7 @@ with -p is not joined with with a file name specified with -c, -o, or -m.
 The -o and -m options can also be used in a form of the digest2 command without
 input observations.  With -o, the action is to get a fresh copy of obscode data
 from the MPC web site and store it to the specified file.  With -m, the action
-is to read `digest2.model.csv` and write the binary equivalent to the specified
+is to read `digest2.model.csv` and write the binary form to the specified
 file.
 
 ##
@@ -323,8 +325,6 @@ NE00269   3
 ```
 
 This might be useful for generating results to be analyzed by another program.
-
-Known quirk:  The order of designations may not match the input.
 
 ##
 ## 7.  Reproducing MPC output
