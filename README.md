@@ -4,11 +4,13 @@ Version 0.17
 ## Contents
 
 1. [Program overview](#markdown-header-)
-2. [Installing from source](#markdown-header-_1)
-3. [Command line usage](#markdown-header-_2)
-4. [Configuring file locations](#markdown-header-_3)
-5. [File formats](#markdown-header-_4)
-6. [Algorithm outline](#markdown-header-_5)
+2. [Building from source](#markdown-header-_1)
+3. [Obtaining a solar system model](#markdown-header-_2)
+4. [Command line usage](#markdown-header-_3)
+5. [Configuring file locations](#markdown-header-_4)
+6. [File formats](#markdown-header-_5)
+7. [Reproducing MPC output](#markdown-header-_6)
+8. [Algorithm outline](#markdown-header-_7)
 
 ##
 ## 1.  Program overview
@@ -44,9 +46,9 @@ You put them in a file, say fmo.obs, then type "digest2 fmo.obs" and
 get the following output:
 
 ```
-Digest2 version 0.17 -- Released February 20 2015 -- Compiled Feb 20 2015
+Digest2 version 0.17 -- Released May 15 2015 -- Compiled May 15 2015
 Desig.    RMS Int NEO N22 N18 Other Possibilities
-NE00030  0.15 100 100  37   0
+NE00030  0.15 100 100  36   0
 NE00199  0.56  98  97  17   0 (MC 2) (JFC 1)
 NE00269  0.42  18  18   3   0 (MC 9) (Hun 4) (Pho 27) (MB1 <1) (Han <1) (MB2 30) (MB3 12) (JFC 1)
 ```
@@ -69,7 +71,7 @@ due to great circle departure, but digest2 offers no way of distinguishing this
 case from one where observations are bad.
 
 ##
-## 2.  Installing from source
+## 2.  Building from source
 
 Source files are available at http://bitbucket.org/mpcdev/digest2/downloads.
 The downloads page has three tabs, "Downloads," "Tags," and "Branches."
@@ -80,7 +82,7 @@ the option to name the archive file.  By default the archive may be named
 with a commit hash.
 
 In any case, you should be able to unpack the archive with a command like
-"tar xjf <filename>" on most Unix-like systems.
+`tar xjf <filename>` on most Unix-like systems.
 
 Cd into the directory created by unpacking the archive and you should find
 the following files:
@@ -104,21 +106,27 @@ current directory and is usable as it is.  If you would like to manually
 relocate it, read below under configuration.
 
 ##
-## 3.  Command line usage
+## 3.  Obtaining a solar system model
+
+Digest2 requires a solar system model which is obtained separately from the program.  The file digest2.model.csv can be downloaded from the [download page](https://bitbucket.org/mpcdev/digest2/downloads) of this repository.  Alternatively, if you wish to duplicate exactly the results from the MPC [Neo Rating](http://mpc.cfa.harvard.edu/iau/NEO/PossNEO.html) page, follow instructions there to download an archive of the model and associated configuration file currently in use by the MPC.
+
+##
+## 4.  Command line usage
 
 The main executable is digest2.  Invoking the program without command line
 arguments (or with invalid arguments) shows this usage prompt.
 
 ```
-Usage: digest2 [options] <obsfile>    score observations in file
-       digest2 [options] -            score observations from stdin
-       digest2 -h or --help           display help and quick reference
-       digest2 -v or --version        display version and copyright
+Usage: digest2 [options] <obs file>    score observations in file
+       digest2 [options] -             score observations from stdin
+       digest2 -m <binary model file>  generate binary model from CSV
+       digest2 -h or --help            display help and quick reference
+       digest2 -v or --version         display version and copyright
 
 Options:
-       -c or --config <config-file>
-       -m or --model <model-file>
-       -o or --obscodes <obscode-file>
+       -c or --config <config file>
+       -m or --model <binary model file>
+       -o or --obscodes <obscode file>
        -p or --config-path <path>
        -u or --cpu <n-cores>
 ```
@@ -135,7 +143,7 @@ The default is the number returned by the C function sysconf, typically
 the total number of cores in the computer.
 
 ##
-## 4.  Configuring file locations
+## 5.  Configuring file locations
 
 The digest2 executable can be copied to another location, a bin directory
 for example, and you can access it as you would any other binary executable.
@@ -166,7 +174,7 @@ with the -c, -o, or -m option takes precedence.  That is, the path specified
 with -p is not joined with with a file name specified with -c, -o, or -m.
 
 ##
-## 5.  File formats
+## 6.  File formats
 
 Observations, whether supplied in a file or through stdin, should contain
 observations in the MPC 80 column observation format and nothing else.
@@ -176,10 +184,10 @@ of observation, and there should be at least two observations of each object.
 digest2.obscodes is a text file containing observatory codes in the standard
 MPC format.
 
-model.csv is a comma separated text file containing the solar system model
+digest2.model.csv is a comma separated text file containing the solar system model
 used by digest2.
 
-digest2.model is a binary encoding of model.csv
+digest2.model is a binary encoding of digest2.model.csv
 
 digest2.config, the optional configuration file, is a text file with a simple
 format.  Empty lines and lines beginning with # are ignored.  Other lines must
@@ -201,7 +209,8 @@ Allowable keywords:
 Headings and the rms column can be turned off if desired.
 
 Keywords raw and noid determine the score produced as described below
-under Theory.  The default is noid.  If both keywords are present, both scores are output.
+under Algorithm outline.  The default is noid.  If both keywords are present,
+both scores are output.
 
 The keywords repeatable and random determine if program output is
 strictly repeatable or can vary slightly from one run to the next.
@@ -280,7 +289,7 @@ JTr
 program output is
 
 ```
-Digest2 version 0.17 -- Released February 20 2015 -- Compiled Feb 20 2015
+Digest2 version 0.17 -- Released May 15 2015 -- Compiled May 15 2015
 Desig.    RMS NEO Hun JTr
 NE00030  0.15 100   0   0
 NE00199  0.56  97   0   0
@@ -302,7 +311,7 @@ output:
 
 ```
 NE00030  37
-NE00199  17
+NE00199  18
 NE00269   3
 ```
 
@@ -311,7 +320,16 @@ This might be useful for generating results to be analyzed by another program.
 Known quirk:  The order of designations may not match the input.
 
 ##
-## 6.  Algorithm outline
+## 7.  Reproducing MPC output
+
+Digest2 output scores can vary somewhat due to three causes: 1) the random sampling performed by the algorithm, 2) the configured observational error allowances, and 3) the asteroid catalog on which the solar system model is based.  These sources of variability can be eliminated by configuring repeatable mode, configuring observational error allowances, and using a reference model file.  The MPC is now running digest2 configured in repeatable mode and providing a download of the reference model and configuration file.  The [Neo Rating](http://mpc.cfa.harvard.edu/iau/NEO/PossNEO-test.html) page has a link to download an archive containing the model and configuration file in use.
+
+To reproduce MPC output, you should check that you are running the same version of digest2, that you have downloaded the model and configuration from the MPC, and that you are using these files.
+
+You should follow these steps only if you feel a compelling reason to reproduce MPC scores.  In general, the recommended practice is to run digest2 in random mode (the default) with observational error allowances you feel are appropriate, and with any reasonably current model.
+
+##
+## 8.  Algorithm outline
 
 1.  For each object, the program computes a motion vector from the
 first and last observation, and computes a V magnitude from whatever
