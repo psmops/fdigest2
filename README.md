@@ -113,7 +113,7 @@ Digest2 requires a solar system model which is obtained separately from the prog
 ##
 ## 4.  Command line usage
 
-The main executable is digest2.  Invoking the program without command line
+If you successfully build a `digest2` executable and downloaded a `digest2.model.csv` to the same directory, you should be able to run it from this directory.  Invoking the program without command line
 arguments (or with invalid arguments) shows this usage prompt.
 
 ```
@@ -142,20 +142,26 @@ The cpu option allows you to specify the number of threads to use.
 The default is the number returned by the C function sysconf, typically
 the total number of cores in the computer.
 
+If you create `fmo.obs` as described above in section 1, program overview,
+the trial run `digest2 fmo.obs` should give results similar to those shown above.
+
+If you had a successful trial run, digest2 will have created two additional files.
+It will have accessed the MPC web site and downloaded observatory code data
+and it will have written a binary form of the model file.  Digest2 downloads
+observatory code data only if finds it missing.  Similarly it writes a new
+binary model file only if the csv file is updated.
+
+
 ##
 ## 5.  Configuring file locations
 
 The digest2 executable can be copied to another location, a bin directory
 for example, and you can access it as you would any other binary executable.
+In this case, you can use the -p command line option to specify a path
+where digest2 can find its associated files, `digest2.config`, `digest2.obscodes`,
+`digest2.model`, and `digest2.model.csv`.  (A shell alias can be useful here.)
 
-When digest2 runs, it reads observations either from a file or from stdin.
-
-It also reads from a solar system model file, an MPC observatory code file,
-and optionally a configuration file.
-
-Digest2 looks for these files with their default names in the current
-directory unless you specify command line options.  The following
-options allow you to specify these individually.
+For greater control, these files can be specified individually:
 
 	File               Command line option
 	digest2.obscodes   -o
@@ -164,13 +170,15 @@ options allow you to specify these individually.
 
 A configuration file is required to be present if -c is used.
 
-You can use the -p option to specify a common path to the these files,
-overriding the default location.  They will be accessed with their default
-names but in the specified location.
-
 If you specify -p in combination with -c, -o, or -m, the path specified
 with the -c, -o, or -m option takes precedence.  That is, the path specified
 with -p is not joined with with a file name specified with -c, -o, or -m.
+
+The -o and -m options can also be used in a form of the digest2 command without
+input observations.  With -o, the action is to get a fresh copy of obscode data
+from the MPC web site and store it to the specified file.  With -m, the action
+is to read `digest2.model.csv` and write the binary equivalent to the specified
+file.
 
 ##
 ## 6.  File formats
