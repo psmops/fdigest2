@@ -150,13 +150,12 @@ for example, and you can access it as you would any other binary executable.
 
 When digest2 runs, it reads observations either from a file or from stdin.
 
-It also reads from two other required data files and an optional configuration
-file.  Digest2.obscodes and digest2.model are built
-with make and are initially present in the directory where you ran make.
-By default, the program looks for them in the current directory.
+It also reads from a solar system model file, an MPC observatory code file,
+and optionally a configuration file.
 
-You can maintain these three files in their default location or you can
-relocate them and specify their locations with command line options.
+Digest2 looks for these files with their default names in the current
+directory unless you specify command line options.  The following
+options allow you to specify these individually.
 
 	File               Command line option
 	digest2.obscodes   -o
@@ -165,7 +164,7 @@ relocate them and specify their locations with command line options.
 
 A configuration file is required to be present if -c is used.
 
-You can use the -p option to specify a common path to the three files,
+You can use the -p option to specify a common path to the these files,
 overriding the default location.  They will be accessed with their default
 names but in the specified location.
 
