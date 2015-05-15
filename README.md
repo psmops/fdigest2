@@ -91,6 +91,7 @@ the following files:
     digest2.c     C source and header files
     d2cli.c
     d2model.c
+    d2modelio.c
     d2math.c
     d2mpc.c
     digest2.h
