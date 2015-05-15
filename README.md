@@ -113,7 +113,7 @@ Digest2 requires a solar system model which is obtained separately from the prog
 ##
 ## 4.  Command line usage
 
-If you successfully build a `digest2` executable and downloaded a `digest2.model.csv` to the same directory, you should be able to run it from this directory.  Invoking the program without command line
+If you successfully built a `digest2` executable and downloaded a `digest2.model.csv` to the same directory, you should be able to run it from this directory.  Invoking the program without command line
 arguments (or with invalid arguments) shows this usage prompt.
 
 ```
@@ -143,7 +143,7 @@ The default is the number returned by the C function sysconf, typically
 the total number of cores in the computer.
 
 If you create `fmo.obs` as described above in section 1, program overview,
-the trial run `digest2 fmo.obs` should give results similar to those shown above.
+the trial run `./digest2 fmo.obs` should give results similar to those shown above.
 
 If you had a successful trial run, digest2 will have created two additional files.
 It will have accessed the MPC web site and downloaded observatory code data
