@@ -2,5 +2,6 @@ digest2
 digest2.model
 digest2.model.csv
 digest2.obscodes
-digest2.config
+*.config
+*.bz2
 *.obs
