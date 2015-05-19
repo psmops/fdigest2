@@ -452,7 +452,6 @@ int main(int argc, char **argv)
   // column headings, delayed until now to avoid printing column headings
   // only to terminate with an error message if some initialization fails
   if (headings) {
-    printf(msgVersion, __DATE__);
     int c;
     // heading line 1
     if (raw && noid && nClassColumns) {
