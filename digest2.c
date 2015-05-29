@@ -261,8 +261,8 @@ void *scoreStaged(void *id)
     int len = snprintf(outputLine, outputLineSize, "%s", tk->desig + 5);
     if (rms) {
       // we expect 6 new bytes.  more than that means field overflow
-      if (snprintf(outputLine + len, outputLineSize - len, " %5.2f", tk->rms)
-          != 6)
+      if (snprintf
+          (outputLine + len, outputLineSize - len, " %5.2f", tk->rms) != 6)
         strcpy(outputLine + len, " **.**");
       len += 6;
     }
@@ -372,14 +372,14 @@ int main(int argc, char **argv)
   }
   // continue to computations
 
-  FILE *fobs = strcmp(fnObs, "-")
-    ? fopen(fnObs, "r")         // test that file can be opened
+  char *obsFnPrint = strcmp(fnObs, "-") ? fnObs : "stdin";
+  FILE *fobs = strcmp(fnObs, "-") ? fopen(fnObs, "r") // test that file can be opened
     : stdin;
   if (!fobs)
-    fatal1(msgOpen, fnObs);
+    fatal1(msgOpen, obsFnPrint);
 
   if (!fgets(line, LINE_SIZE, fobs)) // test that file can be read
-    fatal1(msgRead, argv[1]);
+    fatal1(msgRead, obsFnPrint);
 
   // three more that set up globals and terminate on error
   initGlobals();
@@ -487,8 +487,7 @@ int main(int argc, char **argv)
   observation obs1;
 
   tracklet *tk = parseMpc80(line, &obs1)
-    ? resetValid(line, &obs1)
-    : resetInvalid();
+    ? resetValid(line, &obs1) : resetInvalid();
 
   // main loop
   while (fgets(line, LINE_SIZE, fobs)) {
