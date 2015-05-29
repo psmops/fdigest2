@@ -43,8 +43,8 @@ char *scanField(char *start)
   return end;
 }
 
-_Bool readCSVClass(FILE * fcsv, double pop[QX][EX][IX][HX], char *mod,
-                   char *class)
+_Bool
+readCSVClass(FILE * fcsv, double pop[QX][EX][IX][HX], char *mod, char *class)
 {
   char *t;
   double d;

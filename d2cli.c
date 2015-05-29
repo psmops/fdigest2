@@ -237,8 +237,7 @@ void readConfig()
     for (int c = 0;; c++) {
       if (c == D2CLASSES)
         fatal1(msgConfig, line);
-      if (!strcmp(line, classHeading[c])
-          || !strcmp(line, classAbbr[c])) {
+      if (!strcmp(line, classHeading[c]) || !strcmp(line, classAbbr[c])) {
         if (!classSpec) {
           classSpec = 1;
           nClassColumns = 0;

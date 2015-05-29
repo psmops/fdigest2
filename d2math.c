@@ -444,35 +444,24 @@ _Bool searchAngles(tracklet * tk)
             perClass *cl = tk->class;
             for (int c = 0; c < nClassCompute; c++, cl++) {
               if (cl->dInClass[iq][ie]
-                  [ii]
-                  [ih]
-                  && !cl->tagInClass[iq]
-                  [ie]
-                  [ii][ih]) {
+                  [ii][ih] && !cl->tagInClass[iq][ie][ii][ih]) {
                 newTag = 1;
-                cl->tagInClass[iq][ie][ii]
-                  [ih] = 1;
-                cl->sumAllInClass += modelAllClass[classCompute[c]][iq][ie]
-                  [ii][ih];
-                cl->sumUnkInClass += modelUnkClass[classCompute[c]][iq][ie]
-                  [ii][ih];
+                cl->tagInClass[iq][ie][ii][ih] = 1;
+                cl->sumAllInClass +=
+                  modelAllClass[classCompute[c]][iq][ie][ii][ih];
+                cl->sumUnkInClass +=
+                  modelUnkClass[classCompute[c]][iq][ie][ii][ih];
               }
               if (cl->dOutOfClass[iq]
-                  [ie]
-                  [ii][ih]
-                  && !cl->tagOutOfClass[iq]
-                  [ie][ii][ih]) {
+                  [ie][ii][ih] && !cl->tagOutOfClass[iq][ie][ii][ih]) {
                 newTag = 1;
                 cl->tagOutOfClass[iq][ie][ii][ih] = 1;
                 cl->sumAllOutOfClass += (modelAllSS[iq][ie][ii][ih]
                                          - modelAllClass[classCompute[c]]
-                                         [iq]
-                                         [ie][ii][ih]);
-                cl->sumUnkOutOfClass += (modelUnkSS[iq][ie][ii][ih]
-                                         - modelUnkClass[classCompute[c]]
-                                         [iq]
-                                         [ie]
-                                         [ii][ih]);
+                                         [iq][ie][ii][ih]);
+                cl->sumUnkOutOfClass +=
+                  (modelUnkSS[iq][ie][ii][ih] -
+                   modelUnkClass[classCompute[c]][iq][ie][ii][ih]);
               }
             }
           }
