@@ -55,6 +55,7 @@ char *fnCSV = "digest2.model.csv";
 char *fnOCD = "digest2.obscodes";
 char *fpConfig = "";
 
+char msgAccess[] = "Cannot access URL %s\n";
 char msgCSVHeader[] = "Invalid CSV header:  %s\n";
 char msgCSVData[] = "Invalid CSV data:  %s\n";
 char msgCSVStat[] = "%s:         %d bytes %s"; // file name, size, date
@@ -93,19 +94,19 @@ print message to stdout and terminate program.
 */
 void fatal(char *msg)
 {
-  printf(msg);
+  fputs(msg, stderr);
   exit(-1);
 }
 
 void fatal1(char *msg, char *arg)
 {
-  printf(msg, arg);
+  fprintf(stderr, msg, arg);
   exit(-1);
 }
 
 void fatal2(char *msg, char *arg1, char *arg2)
 {
-  printf(msg, arg1, arg2);
+  fprintf(stderr, msg, arg1, arg2);
   exit(-1);
 }
 
@@ -165,7 +166,7 @@ void readConfig()
 
   char line[20];
   if (!fgets(line, sizeof(line), fcfg)) {
-    printf(msgRead, fnConfig);
+    fprintf(stderr, msgRead, fnConfig);
     if (!configSpec)
       return;
     exit(-1);

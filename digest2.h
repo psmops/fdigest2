@@ -137,6 +137,7 @@ extern char *fnCSV;
 extern char *fnModel;
 extern char *fnOCD;
 
+extern char msgAccess[];
 extern char msgCSVData[];
 extern char msgCSVHeader[];
 extern char msgMemory[];

@@ -142,7 +142,7 @@ _Bool getOCD()
 {
   sprintf(line, "curl %s -o %s", OCD_URL, CPspec(fnOCD, ocdSpec));
   if (system(line) != 0) {
-    printf("msgAccess", OCD_URL);
+    fprintf(stderr, msgAccess, OCD_URL);
     return false;
   }
   return true;

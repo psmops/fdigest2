@@ -662,8 +662,8 @@ void gcFit(gcfparam * gcf, double mjd[gcf->nObs], double sphr[gcf->nObs][2])
   // invariant: first and last points should be on the z=0 plane
   // of the rotated coordinate system now.
   if (fabs(rotated[0][2]) > rtol || fabs(rotated[nObs - 1][2]) > rtol) {
-    printf("%f %f %f\n", rotated[0][2], rotated[nObs - 1][2], rtol);
-    puts("*** rotation failed ***");
+    fprintf(stderr, "%f %f %f\n", rotated[0][2], rotated[nObs - 1][2], rtol);
+    fputs("*** rotation failed ***\n", stderr);
     exit(-1);
   }
   // convert back to spherical coordinates for adjustment.
