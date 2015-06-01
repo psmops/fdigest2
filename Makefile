@@ -8,3 +8,4 @@ digest2: Makefile $(d2src) digest2.h d2model.h
 # indent options in .indent.pro
 indent:
 	indent *.c *.h
+	rm *.c~ *.h~
