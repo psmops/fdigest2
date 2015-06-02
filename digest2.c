@@ -378,9 +378,18 @@ int main(int argc, char **argv)
   if (!fobs)
     fatal1(msgOpen, obsFnPrint);
 
-  if (!fgets(line, LINE_SIZE, fobs)) // test that file can be read
-    fatal1(msgRead, obsFnPrint);
-
+  if (!fgets(line, LINE_SIZE, fobs)) { // test that file can be read
+    // no data is not an error, just issue message and exit.
+    // this is important for the web service.  errors from digest2 turn into
+    // status 500s or similar because error conditions are out of the user's
+    // control and so are not reported to the user.
+    if (feof(fobs)) {
+      fclose(fobs);
+      puts("\nNo input data.");
+      exit(0);
+    }
+    fatal1(msgRead, obsFnPrint); // anything else is a problem
+  }
   // three more that set up globals and terminate on error
   initGlobals();
 
