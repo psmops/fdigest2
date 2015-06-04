@@ -80,7 +80,7 @@ Usage: digest2 [options] <obs file>    score observations in file
        digest2 [options] -             score observations from stdin
        digest2 -m <binary model file>  generate binary model from CSV
        digest2 -h or --help            display help and quick reference
-       digest2 -v or --version         display version and copyright
+       digest2 -v or --version         display program version and model date
 
 Options:
        -c or --config <config file>

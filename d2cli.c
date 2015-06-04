@@ -12,7 +12,7 @@
 #include "digest2.h"
 
 char msgVersion[] =
-  "Digest2 version 0.17 -- Released May 19 2015 -- Compiled %s\n";
+  "Digest2 version 0.17 -- Released June 4, 2015 -- Compiled %s\n";
 char msgCopyright[] = "Public domain.";
 
 // stuff used for parsing command line
@@ -76,7 +76,7 @@ Usage: digest2 [options] <obs file>    score observations in file\n\
        digest2 [options] -             score observations from stdin\n\
        digest2 -m <binary model file>  generate binary model from CSV\n\
        digest2 -h or --help            display help and quick reference\n\
-       digest2 -v or --version         display version and copyright\n\
+       digest2 -v or --version         display program version and model date\n\
 \n\
 Options:\n\
        -c or --config <config file>\n\
