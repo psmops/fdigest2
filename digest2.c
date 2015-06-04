@@ -325,15 +325,6 @@ void *scoreStaged(void *id)
 process MPC 80 column observation records and output scores to stdout
 
 specify file to process on command line
-
-other prerequisite is file digest2.muk, prepared by running muk.c.  see
-muk.c internal documentation.
-
-limitations of this driver:
-   - processes only MPC 80 column earth-based observation records.
-     support for data in other formats should be possible.
-
-   - results are text on stdout.
 */
 int main(int argc, char **argv)
 {
@@ -341,30 +332,29 @@ int main(int argc, char **argv)
   char *fnObs = parseCl(argc, argv);
 
   // read model
-  if (modelSpec) {
-    if (fnObs) {
+  if (fnObs) {
+    if (modelSpec) {
       // fast path using binary model file only. no csv checks.
       mustReadModel();
     } else {
-      // generate model only, no computations
-      struct stat csv;
-      mustReadCSV(&csv);
-      writeModel(&csv);
+      mustReadModelStatCSV();   // with model/csv caching logic
     }
-  } else {
-    mustReadModelStatCSV();     // with model/csv caching logic
+  } else if (modelSpec) {
+    // generate model only, no computations
+    struct stat csv;
+    mustReadCSV(&csv);
+    writeModel(&csv);
   }
-
   // similar logic for obscode dat
-  if (ocdSpec) {
-    if (fnObs) {
+  if (fnObs) {
+    if (ocdSpec) {
       mustReadOCD();
     } else {
-      // get obscode dat only, no computations
-      getOCD();
+      mustReadGetOCD();         // with caching logic
     }
-  } else {
-    mustReadGetOCD();           // with caching logic
+  } else if (ocdSpec) {
+    // get obscode dat only, no need to read it.
+    getOCD();
   }
 
   if (!fnObs) {
