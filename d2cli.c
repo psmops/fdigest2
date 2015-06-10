@@ -2,6 +2,7 @@
 //
 // Public domain.
 
+#include <assert.h>
 #include <errno.h>
 #include <getopt.h>
 #include <stdio.h>
@@ -19,7 +20,7 @@ char msgCopyright[] = "Public domain.";
 //-----------------------------------------------------------------------------
 char line[LINE_SIZE];
 char field[FIELD_SIZE];
-char sOpt[] = "hvc:m:o:p:u:";
+char sOpt[] = "hvc:m:o:p:u:l:";
 struct option lOpt[] = {
   {"help", no_argument, 0, 'h'},
   {"version", no_argument, 0, 'v'},
@@ -28,6 +29,7 @@ struct option lOpt[] = {
   {"obscodes", required_argument, 0, 'o'},
   {"config-path", required_argument, 0, 'p'},
   {"cpu", required_argument, 0, 'u'},
+  {"limit", required_argument, 0, 'l'},
   {0, 0, 0, 0}
 };
 
@@ -36,6 +38,7 @@ _Bool modelSpec = 0;
 _Bool ocdSpec = 0;
 _Bool pathSpec = 0;
 _Bool cpuSpec = 0;
+_Bool limitSpec = 0;
 _Bool classPossible;
 _Bool raw, noid;
 _Bool headings, rms, repeatable;
@@ -43,6 +46,9 @@ int nClassCompute;
 int nClassColumns;
 int classCompute[D2CLASSES];
 int classColumn[D2CLASSES];
+int limitClass;
+_Bool limitRaw;
+int limit;
 
 // "constant" global data
 //-----------------------------------------------------------------------------
@@ -71,6 +77,11 @@ char msgStatus[] = "Internal error:  Unexpected tracklet status.\n";
 char msgThread[] = "Thread creation failed.\n";
 char msgOption[] = "Unknown option: %s\n";
 char msgObsErr[] = "%s\nConfig file line: %s\n";
+char msgLimit[] = "--limit invalid syntax: %s\n";
+char msgLimitClass[] = "--limit invalid orbit class: %s (see digest2 -h)\n";
+char msgLimitLimit[] = "--limit value must be in range [1,100]: %s\n";
+char msgLimitClassNotConfig[] = "--limit orbit class not configured\n";
+char msgLimitScoreNotConfig[] = "--limit score not configured\n";
 char msgUsage[] = "\
 Usage: digest2 [options] <obs file>    score observations in file\n\
        digest2 [options] -             score observations from stdin\n\
@@ -83,7 +94,8 @@ Options:\n\
        -m or --model <binary model file>\n\
        -o or --obscodes <obscode file>\n\
        -p or --config-path <path>\n\
-       -u or --cpu <n-cores>\n";
+       -u or --cpu <n-cores>\n\
+       -l or --limit <class>/<score>=<limit>\n";
 
 // functions
 //-----------------------------------------------------------------------------
@@ -289,6 +301,38 @@ void printVersion()
   printf(msgModelBasis, fnModel, mod.st_size, ctime(&mod.st_mtime));
 }
 
+void mustParseLimit(char *optarg)
+{
+  regex_t rxLimit;
+  assert(regcomp(&rxLimit, "^(.+)/(raw|noid)=([0-9]+)$", REG_EXTENDED) == 0);
+  regmatch_t ss[4];
+  int r = regexec(&rxLimit, optarg, 4, ss, 0);
+  if (r == REG_ESPACE)
+    fatal(msgMemory);
+  if (r == REG_NOMATCH)
+    fatal1(msgLimit, optarg);
+
+  // set limitClass
+  for (int c = 0;; c++) {
+    if (c == D2CLASSES)
+      fatal1(msgLimitClass, optarg);
+    if (!strncmp(optarg, classHeading[c], ss[1].rm_eo)
+        || !strncmp(optarg, classAbbr[c], ss[1].rm_eo)) {
+      limitClass = c;
+      break;
+    }
+  }
+
+  // set limitRaw
+  limitRaw = optarg[ss[2].rm_so] == 'r'; // (we know it matched raw or noid)
+
+  // set limit
+  limit = atoi(optarg + ss[3].rm_so);
+  if (limit < 1 || limit > 100) {
+    fatal1(msgLimitLimit, optarg);
+  }
+}
+
 // returns obs file specified on command line.  this can be null, "-",
 // or a filespec.
 char *parseCl(int argc, char **argv)
@@ -349,6 +393,10 @@ Orbit classes:");
     case 'u':
       cores = atoi(optarg);
       cpuSpec = 1;
+      break;
+    case 'l':
+      mustParseLimit(optarg);
+      limitSpec = 1;
       break;
     case -1:
       // typcally one arg should be left, the input observation file.

@@ -149,6 +149,8 @@ extern char msgStatus[];
 extern char msgThread[];
 extern char msgUsage[];
 extern char msgVersion[];
+extern char msgLimitClassNotConfig[];
+extern char msgLimitScoreNotConfig[];
 
 #define obscodeNamespaceSize 3600
 extern site siteTable[obscodeNamespaceSize];
@@ -160,7 +162,9 @@ extern int nClassCompute;
 extern int classCompute[D2CLASSES];
 extern double obsErr;
 extern regex_t rxObsErr;
+extern regex_t rxLimit;
 extern int cores;
+extern int limit;
 
 void fatal(char *msg);
 void fatal1(char *msg, char *arg);
@@ -171,10 +175,13 @@ extern _Bool ocdSpec;
 extern _Bool classPossible;
 extern _Bool raw, noid;
 extern _Bool headings, rms, repeatable;
+extern _Bool limitSpec;
+extern _Bool limitRaw;
 extern int nClassCompute;
 extern int nClassColumns;
 extern int classCompute[D2CLASSES];
 extern int classColumn[D2CLASSES];
+extern int limitClass;
 
 // functions in d2cli.c
 char *CPspec(char *fn, _Bool spec);
