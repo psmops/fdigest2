@@ -67,5 +67,5 @@ it in the current directory with the file name `digest2.obscodes`.
 
 ## Installation and configuration
 
-General instructions are in the file OPERATION.md.  If you are interested in
-exactly reproducing MPC results, also see the file RESULTS.md.
+See file OPERATION.md.
+

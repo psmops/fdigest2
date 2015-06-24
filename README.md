@@ -14,9 +14,6 @@ model is on the "Downloads" tab, the source code is on the "Tags" tab.
 
 * Further instructions on configuration and operation are in OPERATION.md.
 
-* If you are interested in setting up digest2 to exactly match Minor Planet
-Center results, see the file RESULTS.md.
-
 * An outline of the underlying algorithm is in ALGORITHM.md.
 
 * Digest2 is public domain.
