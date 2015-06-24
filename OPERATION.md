@@ -17,12 +17,11 @@ Digest2 version 0.17
      NE00269  C2003 01 06.54359 12 40 51.68 +18 27 42.5          21.9 Vd     291
 ```
 
-in a file `fmo.obs` and showed the command `digest2 fmo.obs` producing this
+in file `sample.obs` and showed the command `digest2 sample.obs` producing this
 output:
 
 ```
-Desig.    RMS Int NEO N22 N18 Other Possibilities
-NE00030  0.15 100 100  36   0
+NE00030  0.15 100 100  37   0
 NE00199  0.56  98  97  17   0 (MC 2) (JFC 1)
 NE00269  0.42  18  18   3   0 (MC 9) (Hun 4) (Pho 27) (MB1 <1) (Han <1) (MB2 30) (MB3 12) (JFC 1)
 ```
@@ -135,6 +134,9 @@ digest2.config, the optional configuration file, is a text file with a simple
 format.  Empty lines and lines beginning with # are ignored.  Other lines must
 contain either a keyword or an orbit class.
 
+MPC.config is provided as a list of the observational error allowances
+currently used by the MPC.  This file is included (along with
+digest2.model.csv) in d2model.tar.bz2.  See BUILDING.md.
 ## Configuring file locations
 
 As described above the -p command line option is useful to specify a
@@ -258,7 +260,6 @@ JTr
 program output is
 
 ```
-Digest2 version 0.17 -- Released May 15 2015 -- Compiled May 15 2015
 Desig.    RMS NEO Hun JTr
 NE00030  0.15 100   0   0
 NE00199  0.56  97   0   0
@@ -285,3 +286,24 @@ NE00269   3
 ```
 
 This might be useful for generating results to be analyzed by another program.
+
+Example 4:
+
+Run `digest2 -c MPC.config sample.obs`.
+
+output:
+
+```
+Desig.    RMS Int NEO N22 N18 Other Possibilities
+NE00030  0.15 100 100  36   0
+NE00199  0.56  98  98  17   0 (MC 2) (JFC 1)
+NE00269  0.42  24  23   4   0 (MC 7) (Hun 3) (Pho 15) (MB1 <1) (Han <1) (MB2 41) (MB3 5) (JFC 1)
+```
+
+The command line option -c specifies to use MPC.config as the config file.
+This file specifies obserr for selected observatories.  Included is code 291,
+the observing site for objects NE00030 and NE00269.  Notice Int and NEO scores
+on NE00269 in particular are somewhat higher than before.  The obserr settings
+can sometimes significantly affect scores.  If you are interested in emulating
+scores obtained internally at the MPC, you should use obserr settings from
+this file.

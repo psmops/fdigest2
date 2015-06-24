@@ -33,8 +33,8 @@ two files, `digest2.model.csv` and `MPC.config`.
 ## Initial program checkout
 
 With a digest2 executable and digest2.model.csv (and an Internet connection)
-you should be able to run digest2 now.  Copy the following observations into
-a file, say `fmo.obs`.
+you should be able to run digest2 now.  The following sample observations are
+provided as `sample.obs`.
 
 
 ```
@@ -49,12 +49,11 @@ a file, say `fmo.obs`.
      NE00269  C2003 01 06.54359 12 40 51.68 +18 27 42.5          21.9 Vd     291
 ```
 
-Type "digest2 fmo.obs" and you should get output similar to this:
+Type "digest2 sample.obs" and you should get output similar to this:
 
 ```
-Digest2 version 0.17 -- Released May 15 2015 -- Compiled May 15 2015
 Desig.    RMS Int NEO N22 N18 Other Possibilities
-NE00030  0.15 100 100  36   0
+NE00030  0.15 100 100  37   0
 NE00199  0.56  98  97  17   0 (MC 2) (JFC 1)
 NE00269  0.42  18  18   3   0 (MC 9) (Hun 4) (Pho 27) (MB1 <1) (Han <1) (MB2 30) (MB3 12) (JFC 1)
 ```
