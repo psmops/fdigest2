@@ -134,7 +134,9 @@ char *CPspec(char *fn, _Bool spec)
 
 FILE *openCP(char *fn, _Bool spec, char *mode)
 {
-  return fopen(CPspec(fn, spec), mode);
+  FILE *fp = fopen(CPspec(fn, spec), mode);
+  if (fp) return fp;
+  fatal1(msgOpen, fn);
 }
 
 char *parseObsErr(char *s)
