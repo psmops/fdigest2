@@ -132,11 +132,11 @@ char *CPspec(char *fn, _Bool spec)
   return p;
 }
 
+// Note this function can return null.
+// The result must be checked for null before use.
 FILE *openCP(char *fn, _Bool spec, char *mode)
 {
-  FILE *fp = fopen(CPspec(fn, spec), mode);
-  if (fp) return fp;
-  fatal1(msgOpen, fn);
+  return fopen(CPspec(fn, spec), mode);
 }
 
 char *parseObsErr(char *s)

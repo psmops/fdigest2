@@ -141,7 +141,8 @@ void mustReadCSV(struct stat *buf)
 void writeModel(struct stat *csv)
 {
   FILE *fmod = openCP(fnModel, modelSpec, "w");
-  if (!fwrite(&csv->st_size, sizeof(csv->st_size), 1, fmod) ||
+  if (!fmod ||
+      !fwrite(&csv->st_size, sizeof(csv->st_size), 1, fmod) ||
       !fwrite(&csv->st_mtime, sizeof(csv->st_mtime), 1, fmod) ||
       !fwrite(modelAllSS, sizeof modelAllSS, 1, fmod) ||
       !fwrite(modelUnkSS, sizeof modelUnkSS, 1, fmod) ||
