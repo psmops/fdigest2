@@ -234,6 +234,7 @@ _Bool parseMpc80(char *line, observation * obsp)
     }
   obsp->vmag = mag;
   obsp->site = site;
+  obsp->spacebased = 0;
   return 1;
 }
 
