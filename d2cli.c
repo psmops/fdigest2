@@ -13,7 +13,7 @@
 #include "digest2.h"
 
 char msgVersion[] =
-  "Digest2 version 0.18 -- Released June 24, 2015 -- Compiled %s\n";
+  "Digest2 version 0.19 -- Released August 16, 2017 -- Compiled %s\n";
 char msgCopyright[] = "Public domain.";
 
 // stuff used for parsing command line

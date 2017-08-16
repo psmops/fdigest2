@@ -1,5 +1,5 @@
 # Digest2 operation, including installation and configuration
-Digest2 version 0.17
+Digest2 version 0.19
 
 ## Basic operation
 
