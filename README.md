@@ -5,10 +5,15 @@ object is of various orbit classes, including Near Earth Objects, or NEOs.
 Input is a file of 80 column MPC-format observations, with at least two
 observations per object.  Output is orbit class scores for each object.
 
-* Click the Downloads icon on the navigation bar at left on the Bitbucket
-web page or otherwise go to https://bitbucket.org/skeys/orbsimmpc/downloads.
-There are two parts to download, the source code and the "model."  The
-model is on the "Downloads" tab, the source code is on the "Tags" tab.
+* Digest2 is available on Bitbucket at https://bitbucket.org/mpcdev/digest2/.
+To download and install there are two parts, the source code and the "model,"
+Both available from the digest2
+[Downloads](https://bitbucket.org/mpcdev/digest2/downloads/) page (or on
+Bitbucket, click the Downloads icon on the left.)  The Downloads page has
+tabs labeled "Downloads" and "Tags."  The model is on the
+[Downloads](https://bitbucket.org/mpcdev/digest2/downloads/?tab=downloads) tab,
+the source code is on the
+[Tags](https://bitbucket.org/mpcdev/digest2/downloads/?tab=tags) tab.
 
 * For instructions on building the source code, see the file BUILDING.md.
 
