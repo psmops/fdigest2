@@ -1,5 +1,6 @@
 // d2mpc.c
 //
+//
 // Public domain.
 
 #include <ctype.h>
@@ -228,10 +229,71 @@ _Bool parseMpc80(char *line, observation * obsp)
     case 'B':
       mag -= .8;
       break;
+    case 'U':
+      mag -=1.3;
+      break;
+    case 'g':
+      mag -=0.35;
+      break;
+    case 'r':
+      mag +=0.14;
+      break;
+    case 'R':
+       mag +=0.4;
+       break;
+    case 'C':
+        mag +=0.4;
+        break;
+    case 'W':
+        mag +=0.4;
+        break;
+    case 'i':
+        mag +=0.32;
+        break;
+    case 'z':
+        mag +0.26;
+        break;
+    case 'I':
+        mag +=0.8;
+        break;
+    case 'J': 
+        mag +=1.2;
+        break;
+    case 'w':
+        mag -=0.13;
+        break;
+    case 'y':
+        mag +=0.32;
+        break;
+    case 'L':
+        mag +=0.2;
+        break;
+    case 'H':
+        mag += 1.4;
+        break;
+    case 'K':
+       mag += 1.7;
+        break;
+    case 'Y':
+      mag +=0.7;
+        break;
+    case 'G':
+        mag +=0.28;
+        break;
+    case 'v':
+        mag +=0;
+        break;
+    case 'c':
+        mag -=0.05;
+        break;
+    case 'o':
+        mag +=0.33;
+        break;
     default:
       mag += .4;
       break;
     }
+      
   obsp->vmag = mag;
   obsp->site = site;
   obsp->spacebased = 0;
