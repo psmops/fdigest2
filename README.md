@@ -1,5 +1,7 @@
 # Digest2
 
+Current version: 0.19.1, updated Sep. 20, 2021 by Peter Veres. Changes: d2mpc.c - added band conversions
+
 Digest2 uses statistical ranging techniques to compute chances that an
 object is of various orbit classes, including Near Earth Objects, or NEOs.
 Input is a file of 80 column MPC-format observations, with at least two

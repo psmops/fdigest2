@@ -1,6 +1,6 @@
 // d2mpc.c
 //
-//
+// Update Sep. 20, 2021: added band conversions, by Peter Veres
 // Public domain.
 
 #include <ctype.h>
