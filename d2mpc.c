@@ -1,6 +1,7 @@
 // d2mpc.c
 //
-// Update Sep. 20, 2021: added band conversions, by Peter Veres
+//
+// Update Oct. 7, 2021: added band conversion 'u' and CMOS 'B', by Peter Veres
 // Public domain.
 
 #include <ctype.h>
@@ -178,7 +179,7 @@ Side effect on passed observation struct:
 */
 _Bool parseMpc80(char *line, observation * obsp)
 {
-  if (line[14] != 'C' && line[14] != 'S')
+  if (line[14] != 'C' && line[14] != 'S' && line[14] != 'B')
     return 0;
   // parse right to left so we can punch line with zeros as needed
   int site = parseCod3(line + 77);
@@ -288,6 +289,9 @@ _Bool parseMpc80(char *line, observation * obsp)
         break;
     case 'o':
         mag +=0.33;
+        break;
+    case 'u':
+        mag +=2.5;
         break;
     default:
       mag += .4;

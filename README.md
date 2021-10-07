@@ -1,6 +1,7 @@
 # Digest2
 
-Current version: 0.19.1, updated Sep. 20, 2021 by Peter Veres. Changes: d2mpc.c - added band conversions
+Current version: 0.19.2, updated Oct. 7, 2021 by Peter Veres.
+Changes: d2mpc.c - added band conversion for 'u', added CMOS 'B'
 
 Digest2 uses statistical ranging techniques to compute chances that an
 object is of various orbit classes, including Near Earth Objects, or NEOs.
