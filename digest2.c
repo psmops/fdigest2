@@ -142,8 +142,9 @@ void ringAdd(tracklet * tk)
 {
   pthread_mutex_lock(&mRing);
   // puts needs to be in mutex here because it is not thread safe
-  if (*outputLine)              // empty line means --limit
+  if (*outputLine) {              // empty line means --limit
     puts(outputLine);
+  }
   ring[(ringNext + ringFree) % cores] = tk;
   ringFree++;
   pthread_cond_signal(&cDone);
@@ -167,7 +168,7 @@ void eval(tracklet * tk)
 {
   if (tk->status == INVALID) {
     snprintf(outputLine, outputLineSize,
-             "              %d lines skipped.", tk->lines);
+             "#             %d lines skipped.", tk->lines);
     ringAdd(tk);
     return;
   }
@@ -186,7 +187,7 @@ void eval(tracklet * tk)
 
   if (tk->lines == 1) {
     snprintf(outputLine, outputLineSize,
-             "%s  single observation.  skipped.", tk->desig + 5);
+             "# %s single observation.  skipped.", tk->desig + 5);
     ringAdd(tk);
     return;
   }
@@ -405,7 +406,8 @@ int main(int argc, char **argv)
   classColumn[3] = 3;           // n18
   for (nClassCompute = 0; nClassCompute < D2CLASSES; nClassCompute++)
     classCompute[nClassCompute] = nClassCompute;
-  headings = 1;
+  // headings = 1;
+  headings = 0;
   rms = 1;
   raw = 0;
   noid = 1;
